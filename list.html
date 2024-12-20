@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Danh sách Task</title>
+    <link rel="stylesheet" th:href="@{/styles.css}">
+    <style>
+        .error {
+            color: red;
+            font-size: 0.9em;
+        }
+    </style>
+</head>
+<body>
+<h1>Danh sách Task</h1>
+
+<a th:href="@{/task/create}">Thêm mới Task</a>
+
+<table border="1">
+    <thead>
+    <tr>
+        <th>Tên nhân viên:</th>
+        <th>Mã Task</th>
+        <th>Tên Task</th>
+        <th>Mô tả</th>
+        <th>Hành động</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr th:each="task : ${tasks}">
+        <td th:text="${task.nhanVien.tenNV}"></td>
+        <td th:text="${task.maTask}"></td>
+        <td th:text="${task.tenTask}"></td>
+<!--        <td>-->
+<!--            <img th:src="${task.hinhAnh}" width="50" height="50" alt="Hình ảnh Task">-->
+<!--        </td>-->
+        <td th:text="${task.moTa}"></td>
+        <td>
+            <a th:href="@{/task/edit/{id}(id=${task.maTask})}">Sửa</a> |
+            <a th:href="@{/task/delete/{id}(id=${task.maTask})}"
+               onclick="return confirm('Bạn có chắc chắn muốn xóa task này?')">Xóa</a>
+        </td>
+    </tr>
+    </tbody>
+</table>
+
+<a th:href="@{/nhanvien}">Quay lại danh sách nhân viên</a>
+</body>
+</html>

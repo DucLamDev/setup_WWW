@@ -1,0 +1,105 @@
+package demo.nhanvien.controller;
+
+import demo.nhanvien.entity.NhanVien;
+import demo.nhanvien.entity.Task;
+import demo.nhanvien.service.NhanVienService;
+import demo.nhanvien.service.TaskService;
+import jakarta.validation.Valid;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+
+@Controller
+@RequestMapping("/task")
+public class TaskController {
+
+    @Autowired
+    private TaskService taskService;
+
+    @Autowired
+    private NhanVienService nhanVienService;
+
+    // Hiển thị danh sách công việc
+    @GetMapping
+    public String listTasks(Model model) {
+        List<Task> tasks = taskService.getAllTasks();
+        model.addAttribute("tasks", tasks);
+        return "listTask";
+    }
+
+    // Hiển thị form thêm công việc mới
+    @GetMapping("/create")
+    public String createTaskForm(Model model) {
+        model.addAttribute("task", new Task());
+        return "createTask";
+    }
+
+    @PostMapping("/save")
+    public String saveTask(@Valid @ModelAttribute("task") Task task, BindingResult result, Model model) {
+        if (result.hasErrors()) {
+            return "createTask";
+        }
+        taskService.saveTask(task);
+        return "redirect:/task";
+    }
+
+    // Hiển thị form chỉnh sửa công việc
+    @GetMapping("/edit/{id}")
+    public String editTaskForm(@PathVariable int id, Model model) {
+        Task task = taskService.getTaskById(id);
+        if (task == null) {
+            model.addAttribute("errorMessage", "Không tìm thấy công việc với ID: " + id);
+            return "redirect:/task";
+        }
+
+        // Lấy danh sách nhân viên để hiển thị trong form
+        List<NhanVien> nhanViens = nhanVienService.getAllNhanVien();  // Cần gọi dịch vụ để lấy danh sách nhân viên
+        model.addAttribute("task", task);
+        model.addAttribute("nhanViens", nhanViens);  // Chuyển danh sách nhân viên vào model
+        return "editTask";
+    }
+
+
+    // Cập nhật task
+    @PostMapping("/update/{id}")
+    public String updateTask(
+            @PathVariable int id,
+            @Valid @ModelAttribute("task") Task task,
+            BindingResult result,
+            Model model) {
+
+        // Nếu có lỗi xác thực, quay lại form chỉnh sửa
+        if (result.hasErrors()) {
+            task.setMaTask(id);  // Gán lại ID cho task
+            return "editTask";
+        }
+
+        // Kiểm tra xem nhân viên (manv) có được gán giá trị hay không
+        if (task.getNhanVien() == null || task.getNhanVien().getMaNV() == 0) {
+            model.addAttribute("errorMessage", "Nhân viên không được để trống.");
+            task.setMaTask(id); // Gán lại ID cho task
+            return "editTask";
+        }
+
+        // Gán lại ID cho task và cập nhật
+        task.setMaTask(id);
+        taskService.saveTask(task);
+        return "redirect:/task";  // Quay lại danh sách task
+    }
+
+
+    // Xóa công việc
+    @GetMapping("/delete/{id}")
+    public String deleteTask(@PathVariable int id, Model model) {
+        if (taskService.getTaskById(id) == null) {
+            model.addAttribute("errorMessage", "Không tìm thấy công việc với ID: " + id);
+        } else {
+            taskService.deleteTask(id);
+        }
+        return "redirect:/task";
+    }
+}

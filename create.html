@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Thêm Task</title>
+    <link rel="stylesheet" th:href="@{/styles.css}">
+    <style>
+        .error {
+            color: red;
+            font-size: 0.9em;
+        }
+    </style>
+</head>
+<body>
+<h1>Thêm Task Mới</h1>
+
+<form th:action="@{/task/save}" method="post" th:object="${task}" enctype="multipart/form-data">
+    <label>Nhân viên:</label>
+    <input type="text" th:field="*{nhanVien.maNV}" required>
+    <br>
+    <label>Tên Task:</label>
+    <input type="text" th:field="*{tenTask}" required>
+    <div th:if="${#fields.hasErrors('tenTask')}" th:errors="*{tenTask}" class="error"></div>
+    <br>
+
+    <label>Mô tả:</label>
+    <textarea th:field="*{moTa}" required></textarea>
+    <div th:if="${#fields.hasErrors('moTa')}" th:errors="*{moTa}" class="error"></div>
+    <br>
+
+    <button type="submit">Lưu</button>
+</form>
+
+<a href="/task">Trở lại danh sách Task</a>
+</body>
+</html>
